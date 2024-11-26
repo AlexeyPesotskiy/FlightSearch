@@ -51,7 +51,7 @@ object SearchDestination : NavigationDestination {
 fun SearchScreen(
     state: StateFlow<SearchUiState>,
     onQueryChange: (String) -> Unit,
-    onSearch: (Int) -> Unit,
+    onSearch: (Airport) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column {
@@ -69,7 +69,7 @@ fun SearchScreen(
 fun SearchField(
     state: StateFlow<SearchUiState>,
     onQueryChange: (String) -> Unit,
-    onSearch: (Int) -> Unit,
+    onSearch: (Airport) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState = state.collectAsState().value
@@ -111,7 +111,7 @@ fun SearchField(
 @Composable
 fun SearchSuggestionsList(
     suggestionsList: List<Airport>,
-    onSearch: (Int) -> Unit
+    onSearch: (Airport) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -123,7 +123,7 @@ fun SearchSuggestionsList(
                 modifier = Modifier
                     .padding(bottom = dimensionResource(R.dimen.small_padding))
                     .clickable {
-                        onSearch(it.id)
+                        onSearch(it)
                     }
             ) {
                 Text(

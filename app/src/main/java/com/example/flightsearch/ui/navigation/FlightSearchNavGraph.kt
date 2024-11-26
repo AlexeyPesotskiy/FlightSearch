@@ -23,7 +23,7 @@ fun FlightSearchNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val viewModel: SearchViewModel = viewModel()
+    val viewModel: SearchViewModel = viewModel(factory = SearchViewModel.factory)
     NavHost(
         navController = navController,
         startDestination = SearchDestination.route,
