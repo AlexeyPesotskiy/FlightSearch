@@ -13,7 +13,7 @@ import com.example.flightsearch.ui.FavoritesDestination
 import com.example.flightsearch.ui.FavoritesScreen
 import com.example.flightsearch.ui.SearchDestination
 import com.example.flightsearch.ui.SearchScreen
-import com.example.flightsearch.ui.SearchViewModel
+import com.example.flightsearch.ui.FlightSearchViewModel
 
 /**
  * Provides Navigation graph for the application
@@ -23,7 +23,7 @@ fun FlightSearchNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val viewModel: SearchViewModel = viewModel(factory = SearchViewModel.factory)
+    val viewModel: FlightSearchViewModel = viewModel(factory = FlightSearchViewModel.factory)
     NavHost(
         navController = navController,
         startDestination = SearchDestination.route,
@@ -33,11 +33,19 @@ fun FlightSearchNavHost(
             SearchScreen(
                 viewModel.uiState,
                 viewModel::updateSearchQueryText,
-                viewModel::showFlightsList
+                viewModel::showFlightsList,
+                viewModel::toggleFavoriteButton,
+                viewModel::saveScrollPosition,
+                navController.currentDestination?.route.toString()
             )
         }
         composable(route = FavoritesDestination.route) {
-            FavoritesScreen()
+            FavoritesScreen(
+                viewModel.uiState,
+                viewModel::toggleFavoriteButton,
+                viewModel::saveScrollPosition,
+                navController.currentDestination?.route.toString()
+            )
         }
     }
 }
