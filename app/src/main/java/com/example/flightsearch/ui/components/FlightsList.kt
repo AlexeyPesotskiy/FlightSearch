@@ -43,14 +43,13 @@ fun FlightsList(
     flightsListStream: Flow<List<CardFlight>>,
     onClickFavoriteButton: (CardFlight) -> Unit,
     modifier: Modifier = Modifier,
-    saveScrollPosition: (String, Pair<Int, Int>) -> Unit = { _, _ -> },
-    route: String,
-    scrollPosition: MutableMap<String, Pair<Int, Int>>
+    saveScrollPosition: (Pair<Int, Int>) -> Unit = {},
+    scrollPosition: Pair<Int, Int>
 ) {
     val destinationsList by flightsListStream.collectAsState(emptyList())
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = scrollPosition[route]?.first ?: 0,
-        initialFirstVisibleItemScrollOffset = scrollPosition[route]?.second ?: 0
+        initialFirstVisibleItemIndex = scrollPosition.first,
+        initialFirstVisibleItemScrollOffset = scrollPosition.second
     )
 
     /*
@@ -65,7 +64,7 @@ fun FlightsList(
         }) { index, offset ->
             Pair(index, offset)
         }.debounce(250).collectLatest {
-            saveScrollPosition(route, it)
+            saveScrollPosition(it)
         }
     }
 
