@@ -17,6 +17,8 @@
 - Jetpack Compose
 - Navigation component Compose
 - ViewModel Compose
+- Hilt
+- Preferences DataStore
 - JUnit 4
 - Espresso
 
