@@ -33,8 +33,7 @@ fun FavoritesScreen(
     FlightsList(
         uiState.favoriteFlights,
         onClickFavoriteButton,
-        saveScrollPosition = saveScrollPosition,
-        route = route,
-        scrollPosition = uiState.scrollPosition
+        saveScrollPosition = { saveScrollPosition(route, it) },
+        scrollPosition = uiState.scrollPosition[route] ?: Pair(0, 0)
     )
 }

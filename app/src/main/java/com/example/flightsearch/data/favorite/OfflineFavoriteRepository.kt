@@ -2,8 +2,9 @@ package com.example.flightsearch.data.favorite
 
 
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class OfflineFavoriteRepository(
+class OfflineFavoriteRepository @Inject constructor(
     private val favoriteDao: FavoriteDao
 ): FavoriteRepository {
     override suspend fun addFlight(favorite: Favorite) =

@@ -1,14 +1,7 @@
 package com.example.flightsearch
 
 import android.app.Application
-import com.example.flightsearch.di.AppContainer
-import com.example.flightsearch.di.AppDataContainer
+import dagger.hilt.android.HiltAndroidApp
 
-class FlightSearchApplication : Application() {
-    lateinit var container: AppContainer
-    override fun onCreate() {
-        super.onCreate()
-
-        container = AppDataContainer(this)
-    }
-}
+@HiltAndroidApp
+class FlightSearchApplication : Application()

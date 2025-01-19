@@ -1,25 +1,25 @@
 package com.example.flightsearch.ui
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.flightsearch.FlightSearchApplication
 import com.example.flightsearch.data.CardFlight
+import com.example.flightsearch.data.preferences.UserPreferencesRepository
 import com.example.flightsearch.data.airport.Airport
 import com.example.flightsearch.data.airport.AirportRepository
 import com.example.flightsearch.data.favorite.FavoriteRepository
 import com.example.flightsearch.data.mapToFavorite
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class SearchUiState(
     val searchQueryText: String = "",
@@ -30,9 +30,11 @@ data class SearchUiState(
     val scrollPosition: MutableMap<String, Pair<Int, Int>> = mutableMapOf()
 )
 
-class FlightSearchViewModel(
-    val airportRepository: AirportRepository,
-    val favoriteRepository: FavoriteRepository
+@HiltViewModel
+class FlightSearchViewModel @Inject constructor(
+    private val airportRepository: AirportRepository,
+    private val favoriteRepository: FavoriteRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     /**
@@ -64,12 +66,28 @@ class FlightSearchViewModel(
     ))
     var uiState = _uiState.asStateFlow()
 
-    fun updateSearchQueryText(queryText: String) = _uiState.update {
-        it.copy(
-            searchQueryText = queryText,
-            isSearching = true,
-            suggestions = getAirportSearchSuggestion(queryText)
-        )
+    init {
+        viewModelScope.launch {
+            updateSearchQueryText(
+                userPreferencesRepository.lastSearchQuery.first()
+            )
+        }
+    }
+
+    private fun saveSearchQueryInPreferences(queryText: String) =
+        viewModelScope.launch {
+            userPreferencesRepository.saveLastSearchQuery(queryText)
+        }
+
+    fun updateSearchQueryText(queryText: String) {
+        saveSearchQueryInPreferences(queryText)
+        _uiState.update {
+            it.copy(
+                searchQueryText = queryText,
+                isSearching = true,
+                suggestions = getAirportSearchSuggestion(queryText)
+            )
+        }
     }
 
     private fun getAirportSearchSuggestion(queryText: String): Flow<List<Airport>> =
@@ -83,6 +101,7 @@ class FlightSearchViewModel(
     }
 
     fun showFlightsList(fromAirport: Airport) = with(fromAirport) {
+        saveSearchQueryInPreferences(iataCode)
         _uiState.update { state ->
             state.copy(
                 searchQueryText = iataCode,
@@ -112,19 +131,6 @@ class FlightSearchViewModel(
                 flight.toIataCode
             )
             else favoriteRepository.addFlight(flight.mapToFavorite())
-        }
-    }
-
-    companion object {
-        val factory = viewModelFactory {
-            initializer {
-                FlightSearchViewModel(
-                    airportRepository = (this[APPLICATION_KEY] as FlightSearchApplication)
-                        .container.airportRepository,
-                    favoriteRepository = (this[APPLICATION_KEY] as FlightSearchApplication)
-                        .container.favoriteRepository
-                )
-            }
         }
     }
 }
