@@ -3,6 +3,7 @@ package com.example.flightsearch.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.flightsearch.data.CardFlight
+import com.example.flightsearch.data.preferences.UserPreferencesRepository
 import com.example.flightsearch.data.airport.Airport
 import com.example.flightsearch.data.airport.AirportRepository
 import com.example.flightsearch.data.favorite.FavoriteRepository
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -31,7 +33,8 @@ data class SearchUiState(
 @HiltViewModel
 class FlightSearchViewModel @Inject constructor(
     private val airportRepository: AirportRepository,
-    private val favoriteRepository: FavoriteRepository
+    private val favoriteRepository: FavoriteRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     /**
@@ -63,12 +66,28 @@ class FlightSearchViewModel @Inject constructor(
     ))
     var uiState = _uiState.asStateFlow()
 
-    fun updateSearchQueryText(queryText: String) = _uiState.update {
-        it.copy(
-            searchQueryText = queryText,
-            isSearching = true,
-            suggestions = getAirportSearchSuggestion(queryText)
-        )
+    init {
+        viewModelScope.launch {
+            updateSearchQueryText(
+                userPreferencesRepository.lastSearchQuery.first()
+            )
+        }
+    }
+
+    private fun saveSearchQueryInPreferences(queryText: String) =
+        viewModelScope.launch {
+            userPreferencesRepository.saveLastSearchQuery(queryText)
+        }
+
+    fun updateSearchQueryText(queryText: String) {
+        saveSearchQueryInPreferences(queryText)
+        _uiState.update {
+            it.copy(
+                searchQueryText = queryText,
+                isSearching = true,
+                suggestions = getAirportSearchSuggestion(queryText)
+            )
+        }
     }
 
     private fun getAirportSearchSuggestion(queryText: String): Flow<List<Airport>> =
@@ -82,6 +101,7 @@ class FlightSearchViewModel @Inject constructor(
     }
 
     fun showFlightsList(fromAirport: Airport) = with(fromAirport) {
+        saveSearchQueryInPreferences(iataCode)
         _uiState.update { state ->
             state.copy(
                 searchQueryText = iataCode,

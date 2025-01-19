@@ -4,6 +4,7 @@ import com.example.flightsearch.data.airport.Airport
 import com.example.flightsearch.fake.FakeAirportRepository
 import com.example.flightsearch.fake.FakeDataSource
 import com.example.flightsearch.fake.FakeFavoriteRepository
+import com.example.flightsearch.fake.FakeUserPreferencesRepository
 import com.example.flightsearch.ui.FlightSearchViewModel
 import org.junit.Assert.assertEquals
 import kotlinx.coroutines.flow.first
@@ -22,7 +23,8 @@ class FlightSearchViewModelTest {
     fun createFlightSearchViewModel() {
         viewModel = FlightSearchViewModel(
             FakeAirportRepository(),
-            FakeFavoriteRepository()
+            FakeFavoriteRepository(),
+            FakeUserPreferencesRepository()
         )
     }
 
