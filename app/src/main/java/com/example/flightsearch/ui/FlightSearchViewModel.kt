@@ -1,16 +1,13 @@
 package com.example.flightsearch.ui
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.flightsearch.FlightSearchApplication
 import com.example.flightsearch.data.CardFlight
 import com.example.flightsearch.data.airport.Airport
 import com.example.flightsearch.data.airport.AirportRepository
 import com.example.flightsearch.data.favorite.FavoriteRepository
 import com.example.flightsearch.data.mapToFavorite
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,9 +28,10 @@ data class SearchUiState(
     val scrollPosition: MutableMap<String, Pair<Int, Int>> = mutableMapOf()
 )
 
+@HiltViewModel
 class FlightSearchViewModel @Inject constructor(
-    val airportRepository: AirportRepository,
-    val favoriteRepository: FavoriteRepository
+    private val airportRepository: AirportRepository,
+    private val favoriteRepository: FavoriteRepository
 ) : ViewModel() {
 
     /**
@@ -113,14 +111,6 @@ class FlightSearchViewModel @Inject constructor(
                 flight.toIataCode
             )
             else favoriteRepository.addFlight(flight.mapToFavorite())
-        }
-    }
-
-    companion object {
-        val factory = viewModelFactory {
-            initializer {
-               (this[APPLICATION_KEY] as FlightSearchApplication).applicationComponent.flightSearchViewModel()
-            }
         }
     }
 }
