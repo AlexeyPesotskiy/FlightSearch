@@ -1,8 +1,9 @@
 package com.example.flightsearch.data.airport
 
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class OfflineAirportRepository(
+class OfflineAirportRepository @Inject constructor(
     private val airportDao: AirportDao
 ) : AirportRepository {
 

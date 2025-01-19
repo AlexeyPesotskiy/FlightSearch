@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class SearchUiState(
     val searchQueryText: String = "",
@@ -30,7 +31,7 @@ data class SearchUiState(
     val scrollPosition: MutableMap<String, Pair<Int, Int>> = mutableMapOf()
 )
 
-class FlightSearchViewModel(
+class FlightSearchViewModel @Inject constructor(
     val airportRepository: AirportRepository,
     val favoriteRepository: FavoriteRepository
 ) : ViewModel() {
@@ -118,12 +119,7 @@ class FlightSearchViewModel(
     companion object {
         val factory = viewModelFactory {
             initializer {
-                FlightSearchViewModel(
-                    airportRepository = (this[APPLICATION_KEY] as FlightSearchApplication)
-                        .container.airportRepository,
-                    favoriteRepository = (this[APPLICATION_KEY] as FlightSearchApplication)
-                        .container.favoriteRepository
-                )
+               (this[APPLICATION_KEY] as FlightSearchApplication).applicationComponent.flightSearchViewModel()
             }
         }
     }
